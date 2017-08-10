@@ -1,3 +1,5 @@
+"""Gather necessary data and create JSON with resulting dictionaries."""
+
 from bs4 import BeautifulSoup as bs
 
 from dateutil import parser
@@ -6,29 +8,27 @@ import pickle
 
 import json
 
-import datetime
-
 titles = []
-new_titles = []
-enum_titles = []
 posts = []
 dates = []
 
+"""Import gathered enpoint content."""
 with open("body_dump.pkl", "rb") as f:
     response = pickle.load(f)
 
-with open("titles.pkl", "rb") as f:
-    titles = pickle.load(f)
-
-for t in titles:
-    soup = bs(t, 'html.parser')
+"""Create list containing titles."""
+for r in response:
+    soup = bs(r, 'html.parser')
     pretty = soup.div.prettify()
-    new_titles.append(soup.find_all('h3', class_='post-title entry-title'))
+    titles.append(soup.find_all('h3', class_='post-title entry-title'))
 
+"""Create list containing posts."""
 for r in response:
     soup = bs(r, 'html.parser')
     pretty = soup.div.prettify()
     posts.append(soup.find_all(True, {"class": ["date-outer"]}))
+
+"""Create dictionaries with new key list and endpoint data."""
 
 for num, p in enumerate(posts):
     for enum, i in enumerate(p):
@@ -38,7 +38,7 @@ for num, p in enumerate(posts):
         else:
             keys = ['title', 'date', 'post', 'pictures']
             vals = []
-            title = new_titles[num][enum].text
+            title = titles[num][enum].text
             date = i.h2
             text_date = date.text
             parse_date = parser.parse(text_date)
@@ -57,12 +57,3 @@ for num, p in enumerate(posts):
 
 with open('all_posts.json', 'wb') as outfile:
     json.dump(dates, outfile)
-
-
-# Find all by date-outer class
-# this will create 113 date sorted lists
-# each list has several lists, each has a date
-# sort each sub list out by h2 for date and post-body
-# for content, then map the date to each corresponding
-# content for date, pics pulled by img tag, date parse
-# is parser.parse(date)

@@ -1,3 +1,5 @@
+"""Request and store each endpoint on Ramen Adventures."""
+
 import requests as rq
 
 import pickle
@@ -8,6 +10,7 @@ year = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017]
 
 
 def get_urls(base, years):
+    """Create list of enpoints with supplied dates."""
     m = 8
     y = 2008
     while y < 2018:
@@ -27,19 +30,15 @@ def get_urls(base, years):
             m = m + 1
 
 
-dates = []
-
 get_urls(base, year)
-response = []
-posts = []
-sorted_scrape = []
 
+response = []
+
+"""Store each endpoint's contents in response list."""
 for url in urls:
     result = rq.get(url)
     content = result.content
     response.append(content)
-
-print(response)
 
 with open("body_dump.pkl", "wb") as f:
     pickle.dump(response, f)
